@@ -1,6 +1,6 @@
-require "city-state/version"
+require "geo/version"
 
-module CS
+module Geo
   # CS constants
   MAXMIND_ZIPPED_URL = "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City-CSV.zip"
   FILES_FOLDER = File.expand_path('../db', __FILE__)
@@ -8,7 +8,6 @@ module CS
   COUNTRIES_FN = File.join(FILES_FOLDER, "countries.yml")
 
   @countries, @states, @cities = [{}, {}, {}]
-  @current_country = nil # :US, :BR, :GB, :JP, ...
 
   def self.update_maxmind
     require "open-uri"
@@ -49,7 +48,7 @@ module CS
   STATE_LONG = 7
   CITY = 10
 
-  def self.install(country)
+  def self.install(country, geo_type=nil, geo_parent=nil)
     # get CSV if doesn't exists
     update_maxmind unless File.exists? MAXMIND_DB_FN
 
@@ -99,64 +98,31 @@ module CS
     cities.each { |k, v| cities[k].sort! }
 
     # save to states.us and cities.us
-    states_fn = File.join(FILES_FOLDER, "states.#{country.downcase}")
-    cities_fn = File.join(FILES_FOLDER, "cities.#{country.downcase}")
+    states_fn = File.join(FILES_FOLDER, "#{country.downcase}/states")
+    cities_fn = File.join(FILES_FOLDER, "#{country.downcase}/cities")
     File.open(states_fn, "w") { |f| f.write states.to_yaml }
     File.open(cities_fn, "w") { |f| f.write cities.to_yaml }
     File.chmod(0666, states_fn, cities_fn) # force permissions to rw_rw_rw_ (issue #3)
-    true
-  end
-
-  def self.current_country
-    return @current_country if @current_country.present?
-
-    # we don't have used this method yet: discover by the file extension
-    fn = Dir[File.join(FILES_FOLDER, "cities.*")].last
-    @current_country = fn.blank? ? nil : fn.split(".").last
     
-    # there's no files: we'll install and use :US
-    if @current_country.blank?
-      @current_country = :US
-      self.install(@current_country)
-
-    # we find a file: normalize the extension to something like :US
-    else
-      @current_country = @current_country.to_s.upcase.to_sym    
-    end
-
-    @current_country
+    return states if geo_type == "states"
+    return cities if geo_type == "cities"
+    []
   end
 
-  def self.current_country=(country)
-    @current_country = country.to_s.upcase.to_sym
+  def self.villages(country, district=nil)
+    geo_children(country, "villages", district)
   end
 
-  def self.cities(state, country = nil)
-    self.current_country = country if country.present? # set as current_country
-    country = self.current_country
+  def self.districts(country, city=nil)
+    geo_children(country, "districts", city)
+  end
 
-    # load the country file
-    if @cities[country].blank?
-      cities_fn = File.join(FILES_FOLDER, "cities.#{country.to_s.downcase}")
-      self.install(country) if ! File.exists? cities_fn
-      @cities[country] = YAML::load_file(cities_fn).symbolize_keys
-    end
-
-    @cities[country][state.to_s.upcase.to_sym] || []
+  def self.cities(country, state=nil)
+    geo_children(country, "cities", state)
   end
 
   def self.states(country)
-    self.current_country = country # set as current_country
-    country = self.current_country # normalized
-
-    # load the country file
-    if @states[country].blank?
-      states_fn = File.join(FILES_FOLDER, "states.#{country.to_s.downcase}")
-      self.install(country) if ! File.exists? states_fn
-      @states[country] = YAML::load_file(states_fn).symbolize_keys
-    end
-
-    @states[country] || {}
+    geo_children(country, "states", nil, { abbr: 1 })
   end
 
   # list of all countries of the world (countries.yml)
@@ -187,11 +153,45 @@ module CS
     @countries
   end
 
-  # get is a method to simplify the use of city-state
-  # get = countries, get(country) = states(country), get(country, state) = cities(state, country)
-  def self.get(country = nil, state = nil)
-    return self.countries if country.nil?
-    return self.states(country) if state.nil?
-    return self.cities(state, country)
-  end
+  private
+    def self.geo_children(country, geo_type, geo_parent=nil, fields={})
+      geo_db_fn = File.join(FILES_FOLDER, "#{country.to_s.downcase}/#{geo_type}.csv")
+
+      if File.exists? geo_db_fn
+        return self.load_geo(geo_db_fn, fields, geo_parent)
+      else
+        return self.install(country, geo_type, geo_parent) 
+      end
+    end
+
+    def self.load_geo(geo_db_fn, fields={}, parent=nil)
+      # normalize "parent"
+      parent = parent.to_s.upcase
+      geos = []
+
+      fields = self.default_fields.merge(fields)
+
+      # read CSV line by line
+      File.foreach(geo_db_fn) do |line|
+        rec = line.split(",")
+        next if parent.present? && rec[fields[:parent]] != parent
+
+        area = {}
+        fields.each do |key, val|
+          area[key.to_s] = rec[val.to_i].gsub(/\"/, "")  # sometimes names come with a "\" char
+        end
+
+        geos << area
+      end
+
+      geos
+    end
+
+    def self.default_fields
+      {
+        code: 0,
+        parent: 1,
+        name: 2
+      }
+    end
 end

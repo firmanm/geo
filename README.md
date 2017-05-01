@@ -1,10 +1,10 @@
-# city-state ruby gem
+# geo ruby gem
 
-**city-state** is a very simple ruby gem to get a list of states in a country. Also, you can get a list of cities in a state, and a list of all countries of the world.
+**geo** is a very simple ruby gem to get a list of states in a country. Also, you can get a list of cities in a state, and a list of all countries of the world.
 
 ## Put this gem at your Gemfile:
 ```ruby
-gem 'city-state'
+gem 'geo'
 ```
 
 ## List of states:
@@ -12,7 +12,7 @@ gem 'city-state'
 CS.states(:us)
 # => {:AK=>"Alaska", :AL=>"Alabama", :AR=>"Arkansas", :AZ=>"Arizona", :CA=>"California", :CO=>"Colorado", :CT=>"Connecticut", :DC=>"District of Columbia", :DE=>"Delaware", :FL=>"Florida", :GA=>"Georgia", :HI=>"Hawaii", :IA=>"Iowa", :ID=>"Idaho", :IL=>"Illinois", :IN=>"Indiana", :KS=>"Kansas", :KY=>"Kentucky", :LA=>"Louisiana", :MA=>"Massachusetts", :MD=>"Maryland", :ME=>"Maine", :MI=>"Michigan", :MN=>"Minnesota", :MO=>"Missouri", :MS=>"Mississippi", :MT=>"Montana", :NC=>"North Carolina", :ND=>"North Dakota", :NE=>"Nebraska", :NH=>"New Hampshire", :NJ=>"New Jersey", :NM=>"New Mexico", :NV=>"Nevada", :NY=>"New York", :OH=>"Ohio", :OK=>"Oklahoma", :OR=>"Oregon", :PA=>"Pennsylvania", :RI=>"Rhode Island", :SC=>"South Carolina", :SD=>"South Dakota", :TN=>"Tennessee", :TX=>"Texas", :UT=>"Utah", :VA=>"Virginia", :VT=>"Vermont", :WA=>"Washington", :WI=>"Wisconsin", :WV=>"West Virginia", :WY=>"Wyoming"} 
 ```
-**PS:** *city-state is case insensitive. You can use :US, :us, :Us, "us", "US", ...*
+**PS:** *geo is case insensitive. You can use :US, :us, :Us, "us", "US", ...*
 
 ## List of cities:
 ```ruby
@@ -58,7 +58,7 @@ When getting a city list, you can also specifies the country:
 CS.cities(:sp, :br)
 ```
 
-The country is an optional argument. **city-state** always uses the last country that you used.
+The country is an optional argument. **geo** always uses the last country that you used.
 ```ruby
 CS.states(:br)
 # => {:AC=>"Acre", :AL=>"Alagoas", :AM=>"Amazonas", :AP=>"Amapa", :BA=>"Bahia", :CE=>"Ceara", :DF=>"Federal District", :ES=>"Espirito Santo", :GO=>"Goias", :MA=>"Maranhao", :MG=>"Minas Gerais", :MS=>"Mato Grosso do Sul", :MT=>"Mato Grosso", :PA=>"Para", :PB=>"Paraiba", :PE=>"Pernambuco", :PI=>"Piaui", :PR=>"Parana", :RJ=>"Rio de Janeiro", :RN=>"Rio Grande do Norte", :RO=>"Rondonia", :RR=>"Roraima", :RS=>"Rio Grande do Sul", :SC=>"Santa Catarina", :SE=>"Sergipe", :SP=>"Sao Paulo", :TO=>"Tocantins"}
@@ -70,7 +70,7 @@ CS.cities(:to)
 http://www.learnwithdaniel.com/2015/02/citystate-list-of-cities-and-states-ruby/
 
 # CityState License
-**city-state** is a open source project by Daniel Loureiro with a MIT license. Also, it uses MaxMind open source database.
+**geo** is a open source project by Daniel Loureiro with a MIT license. Also, it uses MaxMind open source database.
 
 # MaxMind License
 Database and Contents Copyright (c) 2015 MaxMind, Inc.

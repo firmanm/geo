@@ -1,3 +1,3 @@
-module CS
+module Geo
   VERSION = "0.0.13"
 end
