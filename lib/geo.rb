@@ -96,13 +96,6 @@ module Geo
     cities = Hash[cities.sort]
     states = Hash[states.sort]
     cities.each { |k, v| cities[k].sort! }
-
-    # save to states.us and cities.us
-    states_fn = File.join(FILES_FOLDER, "#{country.downcase}/states")
-    cities_fn = File.join(FILES_FOLDER, "#{country.downcase}/cities")
-    File.open(states_fn, "w") { |f| f.write states.to_yaml }
-    File.open(cities_fn, "w") { |f| f.write cities.to_yaml }
-    File.chmod(0666, states_fn, cities_fn) # force permissions to rw_rw_rw_ (issue #3)
     
     return states if geo_type == "states"
     return cities if geo_type == "cities"
